@@ -3,6 +3,7 @@
 using namespace std;
 
 #define PI 3.14159265
+double momToKin(double massL, double mom);
 
 //Converts mass and energy to momentum
 double momentum(double mass, double energy){
@@ -41,17 +42,26 @@ momentum to a quadratic function which returns the momentum of the proton. This
 momentum is then passed to a function to convert from momentum to kinetic
 energy of the proton. */
 double collision(double massB, double massT, double massH, double massL, double angle){
+  //Convert masses to energy
   double energyB = massB*(3.0*pow(10,8));
   double energyT = massT*(3.0*pow(10,8));
   double energyH = massH*(3.0*pow(10,8));
   double energyL = massL*(3.0*pow(10,8));
   double momentumB = momentum(massB, energyB);
 
+  //Set up coefficients of the quadratic equation
+    //constants
   double constants = pow(massH,2) - pow(massB,2) - pow(massT,2) - pow(massL,2) + 2.0*energyB*massL + 2.0*massL*massT;
+    //A
   double coefficient1 = 2*(energyB/massL + massT/massL);
+    //B
   double coefficient2 = 2*(momentumB)*cos((angle*PI)/180);
-  double momentumL = roots(coefficient1, coefficient2, constants);
+    //Send over to quadratic function to find roots
+  double mom = roots(coefficient1, coefficient2, constants);
+
+  //Send momentum found to function to convert to KE
   double keL = momToKin(massL, mom);
+
   return keL;
 }
 
@@ -67,6 +77,7 @@ double momToKin(double massL, double mom){
 int main(){
   double massB, massT, massH, massL, angle;
 
+  //Take in masses in amu and convert to MeV/c^2
   cout << "Please input the following in amu:" << endl << "Mass of beam: ";
   cin >> massB;
   massB *= 931.5;
@@ -83,10 +94,13 @@ int main(){
   cin >> massL;
   massL *= 931.5;
 
-  cout << endl << "Please input the angle of the proton discharged in degrees: ";
+  //Take in angle of discharge
+  cout << "Please input the angle of the proton discharged in degrees: ";
   cin >> angle;
 
-  double mom = collision(massB, massT, massH, massL, angle);
+  //Send to calculate the collision
+  double kineticEnergy = collision(massB, massT, massH, massL, angle);
+  cout << "The kinetic energy of the proton is " <<  kineticEnergy << endl;
 
   return 0;
 }
