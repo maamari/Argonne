@@ -58,10 +58,12 @@ double collision(double Kb, double Mb, double Mt, double Mh, double Ml, double a
   //Set up coefficients of the quadratic equation
     //constants
   double a0 = pow(Mh,2)-pow(Mb,2)-pow(Mt,2)-pow(Ml,2)-(2*Mt*energyB);
-  // double a1 = 4*(pow(energyB*Ml,2)+(2*energyB*Mt*(pow(Ml,2)))+pow(Mt*Ml,2));
-  double constants = 4*pow(energyB+Mt,2)-pow(a0,2);
+  double a1 = 4*(pow(energyB*Ml,2)+(2*energyB*Mt*(pow(Ml,2)))+pow(Mt*Ml,2));
+  double constants = a1 - pow(a0,2);
+
     //A
-  double coefficient1 = 4*pow(energyB+Mt,2)-pow(Pb*cos(angle*PI/180),2);
+  double coefficient1 = 4*(pow(energyB,2)+(2*energyB*Mt)+pow(Mt,2)-pow(Pb*cos(angle*PI/180),2));
+
     //B
   double coefficient2 = 4*a0*Pb*cos((angle*PI)/180);
 
