@@ -23,25 +23,8 @@ double roots(double a, double b, double c){
 
   if(!discriminant)
     return -1;
-  //else {
-    double root1 = (-b+sqrt(discriminant))/(2*a);
-    return root1;
-    //cout << "Root 1 is " << root1 << endl;
-
-    //double root2 = (-b + sqrt(discriminant))/2*a;
-    //cout << "Root 2 is " << root2 << endl;
-
-    //int choice;
-    //cout << "Which root would you like, 1 or 2? ";
-    //cin >> choice;
-
-    //if(choice == 1)
-      //return root1;
-    //else if(choice == 2)
-      //return root2;
-  //}
-  //cout << "I'm sorry that was an invalid entry." << endl;
-  //return -1;
+  double root1 = (-b+sqrt(discriminant))/(2*a);
+  return root1;
 }
 
 /* Function to simulate the collision. Takes in the masses (in MeV/c^2) and
@@ -70,35 +53,37 @@ double collision(double Kb, double Mb, double Mt, double Mh, double Ml, double a
   //Send over to quadratic function to find roots
   double mom = roots(coefficient1, coefficient2, constants);
 
-  // cout << mom << endl;
   //Send momentum found to function to convert to KE
   double keL = momToKin(Ml, mom);
   return keL;
 }
 
 int main(){
-  double Mb, Mt, Mh, Ml, angle, Kb;
+  double Mb, Mt, Mh, Mh2, Mh3, Ml, angle, Kb;
   ofstream output("output.txt");
+  ofstream output2("output2.txt");
+  ofstream output3("output3.txt");
 
   //Take in masses in amu and convert to MeV/c^2
-  // cout << "Please input the following in amu:" << endl << "Mass of beam: ";
-  // cin >> Mb;
-  Mb = 18;
+  //cout << "Please input the following in amu:" << endl << "Mass of beam: ";
+  //cin >> Mb;
+  Mb = 18.009380;
   Mb *= 931.49432;
 
   // cout << "Mass of target: ";
   // cin >> Mt;
-  Mt = 2;
+  Mt = 2.0141017;
   Mt *= 931.49432;
 
-  // cout << "Mass of resultant: ";
-  // cin >> Mh;
-  Mh = 19;
-  Mh *= 931.49432;
+   // cout << "Mass of resultant: ";
+   // cin >> Mh;
+  Mh = 18.998403*931.49432;
+  Mh2 = 19.017*931.49432;
+  Mh3 = 19.029*931.49432;
 
   // cout << "Mass of proton: ";
   // cin >> Ml;
-  Ml = 1;
+  Ml = 1.0072764;
   Ml *= 931.49432;
 
   //ask for beam kinetic (180MeV)
@@ -106,22 +91,30 @@ int main(){
   Kb = 180;
   // cin >> Kb;
 
-  cout << "Would you like to output results to screen? (y/n) ";
-  char answer;
-  cin >> answer;
+  // cout << "Would you like to output results to screen? (y/n) ";
+  // char answer;
+  // cin >> answer;
 
   //Take in angle of discharge
   for(double i = 0; i < 180; i++){
     angle = i;
     output << angle << "\t";
+    output2 << angle << "\t";
+    output3 << angle << "\t";
 
     //Send to calculate the collision
-    double kineticEnergy = collision(Kb, Mb, Mt, Mh, Ml, angle);
-    if(answer == 'y')
-      // cout << "The kinetic energy of the proton is " <<  kineticEnergy << " MeV at an angle of " << angle << " degrees." << endl;
-      cout << angle << " " << kineticEnergy << endl;
-    output << kineticEnergy << endl;
+    double kineticEnergy1 = collision(Kb, Mb, Mt, Mh, Ml, angle);
+    double kineticEnergy2 = collision(Kb, Mb, Mt, Mh2, Ml, angle);
+    double kineticEnergy3 = collision(Kb, Mb, Mt, Mh3, Ml, angle);
+    // if(answer == 'y'){
+    //   // cout << "The kinetic energy of the proton is " <<  kineticEnergy << " MeV at an angle of " << angle << " degrees." << endl;
+    //   cout << "**GROUND STATE**" << endl << angle << " " << kineticEnergy1 << endl;
+    //   cout << endl << "**10 MeV Excitation**" << endl << angle << " " << kineticEnergy2 << endl;
+    //   cout << endl << "**20 MeV Excitation**" << endl << angle << " " << kineticEnergy3 << endl;
+    // }
+    output << kineticEnergy1 << endl;
+    output2 << kineticEnergy2 << endl;
+    output3 << kineticEnergy3 << endl;
   }
-
   return 0;
 }
