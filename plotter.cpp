@@ -1,3 +1,14 @@
+/* Created as part of a summer
+   internship at Argonne National
+   Lab.
+
+   The following plots the results
+   of the simulator using CERN's
+   ROOT software.
+
+   Author: Karime Maamari
+   Date: 07/2018                */
+
 {
   TCanvas *c = new TCanvas();
   c->SetFillColor(0);
