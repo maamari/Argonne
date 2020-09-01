@@ -1,3 +1,5 @@
+# Written by Eve K.
+
 import sys
 import os
 import h5py
@@ -11,25 +13,19 @@ from time import time
 import struct
 from struct import pack
 from struct import unpack, calcsize
-
+from tqdm import tqdm
 import matplotlib
 matplotlib.use('Agg')
 from matplotlib import pyplot as plt
 import matplotlib.colors as colors
 import pydot
-#import pydotplus as pydot
+np.set_printoptions(edgeitems=50)
 
-#cc_template = '09_03_2019.AQ.{}.corepropertiesextend.hdf5'
-cc_template = '{}.corepropertiesextend.hdf5'
+cc_template = 'm000p-{}.corepropertiesextend.hdf5'
 binfile_template = 'trees_099.{}'
-coredir = '../CoreCatalogs'
-#treedir = '../CoreTrees'
-#treedir = '../CoreTrees/test'
-#treedir = '../CoreTrees/new_snaps'
-#treedir = '../CoreTrees/relative'
-treedir = '../CoreTrees/fof_group'
-#mkey = 'm_evolved_0.8_0.02'
-mkey = 'm_evolved_0.9_0.005'
+coredir = '/scratch/cpac/kmaamari/outputLJDS'
+treedir = '/scratch/cpac/kmaamari/CoreTreesLJDS'
+mkey = 'm_evolved_0.9_0.001'
 outfile_template = re.sub('propertiesextend', 'trees', cc_template)
 
 coretag = 'core_tag'
@@ -39,10 +35,8 @@ infall_fof_mass = 'infall_fof_halo_mass'
 infall_tree_node_mass = 'infall_tree_node_mass'
 first_snap = 499
 last_snap = 43
-#last_snap = 475
 first_row = 0
-last_row = 99 
-#last_row = 2 
+last_row = 99
 Descendent = 'Descendent'
 FirstProgenitor = 'FirstProgenitor'
 NextProgenitor = 'NextProgenitor'
@@ -63,27 +57,25 @@ SnapNum = 'SnapNum'
 
 # properties for storing in dict or matrices
 core_pointers = [Descendent, DescendentOffset, FirstProgenitor, NextProgenitor,
-                 FirstProgenitorOffset, NextProgenitorOffset]
-#core_pointers = [Descendent, DescendentOffset, FirstProgenitor, FirstProgenitorOffset]
+                         FirstProgenitorOffset, NextProgenitorOffset]
 sibling_pointers = [FirstHaloInFOFGroup, NextHaloInFOFGroup, FirstHaloInFOFGroupOffset, NextHaloInFOFGroupOffset]
-#sibling_pointers = []
 core_properties_float = {'Pos_x':'x', 'Pos_y':'y', 'Pos_z':'z',
-                         'Vel_x':'vx', 'Vel_y':'vy', 'Vel_z':'vz',
-                         'VelDisp':'vel_disp',
-                         'Vmax': 'infall_fof_halo_max_cir_vel',
-                         'M_Crit200': infall_fof_mass,
-                         'M_Mean200': Zero,
-                         'M_TopHat': Zero,
-                         'Spin_x': 'infall_sod_halo_angmom_x',
-                         'Spin_y': 'infall_sod_halo_angmom_y',
-                         'Spin_z': 'infall_sod_halo_angmom_z',
-                         'SubHalfMass': Zero,
-                        }
+                                 'Vel_x':'vx', 'Vel_y':'vy', 'Vel_z':'vz',
+                                                          'VelDisp':'vel_disp',
+                                                                                   'Vmax': 'infall_fof_halo_max_cir_vel',
+                                                                                                            'M_Crit200': infall_fof_mass,
+                                                                                                                                     'M_Mean200': Zero,
+                                                                                                                                                              'M_TopHat': Zero,
+                                                                                                                                                                                       'Spin_x': 'infall_sod_halo_angmom_x',
+                                                                                                                                                                                                                'Spin_y': 'infall_sod_halo_angmom_y',
+                                                                                                                                                                                                                                         'Spin_z': 'infall_sod_halo_angmom_z',
+                                                                                                                                                                                                                                                                  'SubHalfMass': Zero,
+                                                                                                                                                                                                                                                                                          }
 
 core_properties_int = {MostBoundID_Coretag:'core_tag',
-                       'FileNr': Zero,
-                       SubhaloIndex: Zero,
-                      }
+                               'FileNr': Zero,
+                                                      SubhaloIndex: Zero,
+                                                                            }
 
 derived_properties_int = [SnapNum, Len, ParentHaloTag]
 #derived_properties_int = [Len]
@@ -794,7 +786,7 @@ def main(argv):
     process = psutil.Process(os.getpid())
     
     corefiles = glob.glob(coredir+'/*')
-    snapshots = sorted([int(os.path.basename(f).split('.')[0]) for f in corefiles], reverse=True)  
+    snapshots = sorted([int(os.path.basename(f).split('-')[1].split('.')[0]) for f in corefiles], reverse=True)
     coretrees = {}
 
     for n, s in enumerate(snapshots): #process in descending order
