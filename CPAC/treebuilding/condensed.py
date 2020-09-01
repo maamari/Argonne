@@ -301,12 +301,13 @@ def add_snapshot_to_trees(coretrees, corecat, current_snap, snap_index=0,
                                                first_siblings, next_siblings, foftags_fofm_this)
             atimes.append((time()-atime1)/60.)
             #fill row of property matrix with values for selected entries
-            if p is 'Descendent' or p is 'FirstProgenitor' or p is 'NextProgenitor' or p is 'NextHaloInFOFGroup' or p is 'FirstHaloInFOFGroup':
-                print(p)
-                for i,location in enumerate(locations_this):
-                    if snap_index==0: v[snap_index][location] = prop_values[i]
-                    elif v[snap_index-1][location]!=-1: v[snap_index][location] = prop_values[i]
-            else: v[snap_index][locations_this] = prop_values
+            #if p is 'Descendent' or p is 'FirstProgenitor' or p is 'NextProgenitor' or p is 'NextHaloInFOFGroup' or p is 'FirstHaloInFOFGroup':
+            #    print(p)
+            #    for i,location in enumerate(locations_this):
+            #        if snap_index==0: v[snap_index][location] = prop_values[i]
+            #        elif v[snap_index-1][location]!=-1: v[snap_index][location] = prop_values[i]
+            #else: 
+            v[snap_index][locations_this] = prop_values
         # fix first progenitors
         coretrees[FirstProgenitor] = fix_firstprogenitor_vector(coretrees[FirstProgenitor], snap_index)
         coretrees[FirstProgenitorOffset] = fix_firstprogenitor_vector(coretrees[FirstProgenitorOffset], snap_index)
@@ -366,24 +367,14 @@ def get_ordered_property(p, corecat, sorted_indices_this, row, current_snap,
     orphans = np.where(np.round(corecat[coremass][sorted_indices_this]/particle_mass).astype(int)<100)[0]
     if Descendent in p:
         prop_values = np.array([row - 1]*ncores) #row = row of matrix array
-        for i in tqdm(orphans):
-            prop_values[i]=-999 
     elif FirstProgenitor in p:
         prop_values = np.array([row + 1]*ncores) if row != last_row else np.array([-1]*ncores)
-        for i in tqdm(orphans):
-            prop_values[i]=-999
     elif NextProgenitor in p:
         prop_values = np.array([-1]*ncores)
-        for i in tqdm(orphans):
-            prop_values[i]=-999
     elif FirstHaloInFOFGroup in p:
         prop_values = first_siblings
-        for i in tqdm(orphans):
-            prop_values[i]=-999
     elif NextHaloInFOFGroup in p:
         prop_values = next_siblings
-        for i in tqdm(orphans):
-            prop_values[i]=-999
     elif SnapNum in p:
         #prop_values = np.array([current_snap]*ncores)
         prop_values = np.array([last_row - row]*ncores) #L-galaxies needs consecutive integers
@@ -416,7 +407,7 @@ def get_ordered_property(p, corecat, sorted_indices_this, row, current_snap,
                 prop_values /= particle_mass
     else:
         print('Unknown property {}'.format(p))
-    #print("Property =",p,":",prop_values)
+    print("Property =",p,":",prop_values,"\n\t",corecat['central'])
     #print("\t7: get_ordered_property")
     return prop_values
 
@@ -620,6 +611,7 @@ def main(argv):
     
     corefiles = glob.glob(coredir+'/*')
     snapshots = sorted([int(os.path.basename(f).split('-')[1].split('.')[0]) for f in corefiles], reverse=True)  
+    print(snapshots)
     coretrees = {}
     delIndicesArr = []
 
