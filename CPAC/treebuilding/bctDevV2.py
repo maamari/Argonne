@@ -40,7 +40,7 @@ outfile_template = re.sub('propertiesextend', 'trees', cc_template)
 coretag = 'core_tag'
 foftag = 'fof_halo_tag'
 coremass = 'coremass'
-#infall_fof_mass = 'infall_fof_halo_mass'
+infall_fof_mass = 'infall_fof_halo_mass'
 infall_tree_node_mass = 'infall_tree_node_mass'
 first_snap = 499
 last_snap = 43
@@ -77,7 +77,7 @@ core_properties_float = {'Pos_x':'x', 'Pos_y':'y', 'Pos_z':'z',
                          'Vel_x':'vx', 'Vel_y':'vy', 'Vel_z':'vz',
                          'VelDisp':'vel_disp',
                          'Vmax': 'infall_fof_halo_max_cir_vel',
-                         M_Crit200: infall_tree_node_mass,
+                         M_Crit200: infall_fof_mass,
                          'M_Mean200': Zero,
                          'M_TopHat': Zero,
                          'Spin_x': 'infall_sod_halo_angmom_x',
@@ -153,16 +153,9 @@ def get_core_snapshot(coredir, snapshot, template=cc_template, sim=default_sim):
 
 def add_coremass_column(corecat, sim=default_sim):
     mask = (corecat['central']==1) # get centrals
-    central_mass = corecat[infall_tree_node_mass][mask] # get fof mass (possibly fragment)
+    central_mass = corecat[infall_tree_node_mass][mask] # get fof mass
     corecat[coremass] = corecat[mkeys[sim]] # get evolved masses
-    # the mass of centrals are not modeled by mass model 
-    central_massmodel = corecat[coremass][mask]
-    check_mass = np.count_nonzero(~np.isclose(central_mass, central_massmodel)) #check if any entries don't agree
-    if check_mass > 0:
-        print('Mass model != tree-node mass for central cores in {}/{} entries'.format(check_mass,
-                                                                                                np.count_nonzero(mask))) 
-        corecat[coremass][mask] = central_mass  #force mass for centrals = tree-node mass
-    
+    corecat[coremass][mask] = central_mass
     return corecat
     
 def clean(corecat, sorted_coretags):
@@ -402,7 +395,7 @@ def get_ordered_property(p, corecat, sorted_indices_this, row, current_snap,
                 prop_values[mask] = 0.   # set satellite masses to 0.
                 prop_values[~mask] /= particle_mass
             if 'Spin' in p:
-                prop_values /= corecat[infall_tree_node_mass][sorted_indices_this]
+                prop_values /= corecat[infall_fof_mass][sorted_indices_this]
                 
     else:
         print('Unknown property {}'.format(p))
@@ -478,7 +471,7 @@ def add_properties_to_tree(core_tag, location, coretree, corecat,
                 else:
                     coretree[p][-1] /= particle_mass
             if 'Spin' in p:
-                coretree[p][-1] /= corecat[infall_tree_node_mass][location] # divide by mass
+                coretree[p][-1] /= corecat[infall_fof_mass][location] # divide by mass
                 
     return coretree
 
@@ -594,9 +587,7 @@ def read_outfile(outfile, vector=True):
 
                 offset = offset + nhalos
         else:
-            for k in fh['trees'].keys():
-                coretrees[k] = fh['trees'][k][()]
-                
+            print('Not available yet')
     return coretrees, Ntrees, totNHalos, TreeNHalos, coretags
         
 def read_binary(outfile, vector=True):
@@ -608,7 +599,7 @@ def read_binary(outfile, vector=True):
         Ntrees = struct.unpack('<i', fh.read(4))[0]
         totNhalos = struct.unpack('<i', fh.read(4))[0]
         halos_per_tree = np.asarray(struct.unpack('<{}i'.format(Ntrees), fh.read(4*Ntrees)))
-        for tree, nhalos in zip(np.arange(Ntrees), halos_per_tree):
+        for tree, nhalos in tqdm(zip(np.arange(Ntrees), halos_per_tree),total=len(np.arange(Ntrees))):
             #initialize
             data_list = []
             # read tree data
@@ -621,7 +612,7 @@ def read_binary(outfile, vector=True):
                 
         print('Read {} trees with total {} halos'.format(Ntrees, totNhalos))
 
-    return trees, Ntrees, totNhalos, halos_per_tree
+    return trees
 
 def write_binary(outfile, coretrees, cores_to_write, foftags_to_write,
                  vector=True, start=None, end=None, column_counts=None):
@@ -656,7 +647,7 @@ def write_binary(outfile, coretrees, cores_to_write, foftags_to_write,
         values = [Ntrees, totNHalos] + halos_per_tree.tolist()
         header_this = header_format.format(Ntrees + 2)
         fh.write(pack(header_this, *values))
-        print('Wrote header for {} FoF trees with {} halos'.format(Ntrees, totNHalos))
+        print('Wrote header for {} fof trees with {} halos'.format(Ntrees, totNHalos))
         
         if vector:
             assert np.array_equal(foftags_to_write, coretrees[ParentHaloTag][0, start:end]), "ParentHaloTags not in fofm order"
@@ -815,9 +806,8 @@ def main(argv):
     Nfiles = int(argv.get(6, 10000)) #total number of files for vector code
     sim = argv.get(7, 'LJ')  # set simulation
     name = argv.get(0, 'test')
-    outname = '{}_{}'.format(sim, name) if 'test' in name else sim 
-    coredir = '/scratch/cpac/kmaamari/outputLJDS'
-    treedir = '/scratch/cpac/kmaamari/CoreTreesLJDS'
+    coredir = '../CoreCatalogs_{}'.format(sim)
+    treedir = '../CoreTrees/fof_group_{}'.format(sim)
 
     print('Simulation = {}'.format(sim))
     print('Outputs written to {}'.format(treedir))
@@ -848,9 +838,9 @@ def main(argv):
                 if vector: # initialize dict of matrices
                     print('Setting up ordered arrays and tree matrices')
                     ctime = time()
-                    for p in tqdm(integer_properties):
+                    for p in integer_properties:
                         coretrees[p] = np.array([no_int]*Ncores*len(snapshots)).reshape(len(snapshots), Ncores)
-                    for p in tqdm(float_properties):
+                    for p in float_properties:
                         coretrees[p] = np.array([no_float]*Ncores*len(snapshots)).reshape(len(snapshots), Ncores)
                     print('Time to create arrays = {:.2f} minutes'.format((time() - ctime)/60.))
                     print('Keys are: {}'.format(sorted(list(coretrees.keys()))))
@@ -936,11 +926,10 @@ next_halo_arrow = 'limegreen'
 first_prog_arrow = 'orangered'
 next_prog_arrow = 'cyan'
 desc_arrow = 'orchid'
-next_fof_arrow = 'blue'
 
 # outfile='../CoreTrees/trees_099.0.vector'
-# trees, Ntrees, totNhalos, halos_per_tree = build_core_trees.read_binary(outfile)
-# coretrees, Ntrees, totNHalos, TreeNHalos, coretags = build_core_trees.read_outfile(outfile)
+# trees=build_core_trees.read_binary(outfile)
+
 def get_mass_limits(trees, key=Len):
     mass_min = min([np.min(trees[i][key][trees[i][key] > 0.]) for i in range(len(trees)) if np.count_nonzero(trees[i][key] > 0.) > 0])
     mass_max = max([np.max(trees[i][key][trees[i][key] > 0.]) for i in range(len(trees)) if np.count_nonzero(trees[i][key] > 0.) > 0])
@@ -957,7 +946,7 @@ def get_mass_limits(trees, key=Len):
 
 def drawforest(trees, treenum, filetype='.png', sim=default_sim, cmap='Purples',
                clmap='Wistia', clfont='black', fof_mass_min=None, fof_mass_max=None, fontcolor='black',
-               mass_min=1, mass_max=None, alpha_halo=0.75, alpha_fof=0.5, compressed=True, MTtrees=False, xname=''): #pink_r is too light
+               mass_min=1, mass_max=None, alpha=0.5, compressed=True, MTtrees=False, xname=''): #pink_r is too light
 
     particle_mass=particle_masses[sim]
     tree = trees[treenum]
@@ -977,23 +966,24 @@ def drawforest(trees, treenum, filetype='.png', sim=default_sim, cmap='Purples',
     node_names= []
     logm_min = np.min(np.log10(tree[Len]*particle_mass))
     logm_max = np.max(np.log10(tree[Len]*particle_mass))
-    print('Tree {}: log(m_min) = {:.2g}; log(m_max) = {:.2g}'.format(treenum, logm_min, logm_max))
+    #print('Tree {}: log(m_min) = {:.2g}; log(m_max) = {:.2g}'.format(treenum, logm_min, logm_max))
     nsnaps = len(np.unique(tree['SnapNum']))
     norm = colors.LogNorm(vmin=mass_min*particle_mass, vmax=mass_max*particle_mass)
     cm = plt.get_cmap(cmap)
     norm_halo = colors.LogNorm(vmin=fof_mass_min*particle_mass, vmax=fof_mass_max*particle_mass)
     #get fof halo color map
     cm_halo = plt.get_cmap(clmap)
-    # get code for rgb transparency
-    trans_fof = hex(int(round(255*alpha_fof)))[-2:]
-    trans_halo = hex(int(round(255*alpha_halo)))[-2:]
+    # make it transparent - doesn't work with norm
+    #tr_halo = c_halo(np.arange(c_halo.N))
+    #tr_halo[:, -1] = alpha
+    #cm_halo = ListedColormap(tr_halo)
     
     first_progenitors = []
     next_progenitors = []
     snaps = np.arange(np.min(tree[SnapNum]), np.max(tree[SnapNum]+1))[::-1]
 
     #loop through snapshots; assign clusters and nodes
-    for sidx, snap in enumerate(snaps):
+    for sidx, snap in enumerate(tqdm(snaps)):
         print('Processing snapshot {}'.format(snap))
         locs = np.where(tree[SnapNum]==snap)[0]
         #print('locs ', locs)
@@ -1014,7 +1004,8 @@ def drawforest(trees, treenum, filetype='.png', sim=default_sim, cmap='Purples',
             labels_cl = [labels_cl[i] + '\n M = {:.2e} M./h ({:.2f})'.format(halo_masses[i],
                                                                         halo_mlengths[i]) for i in range(len(fof_groups))]
             colors_rgb = [cm_halo(norm_halo(halomass)) for halomass in halo_masses]
-            colors_cl = [colors.to_hex(c) + trans_fof for c in colors_rgb]
+            trans = hex(int(round(255*alpha)))[-2:]
+            colors_cl = [colors.to_hex(c) + trans for c in colors_rgb]
         else:
             colors_cl = [color_cl for f in fof_groups]
 
@@ -1028,7 +1019,7 @@ def drawforest(trees, treenum, filetype='.png', sim=default_sim, cmap='Purples',
         node_names_this = []
         first_progenitors_this = []
         next_progenitors_this = []
-        for ncl, (cl, fof_group) in enumerate(zip(cl_this, fof_groups)):
+        for cl, fof_group in zip(cl_this, fof_groups):
 
             nodes_fof = []
             mask = (first_halos==fof_group)
@@ -1043,7 +1034,7 @@ def drawforest(trees, treenum, filetype='.png', sim=default_sim, cmap='Purples',
                                                   lengths_in_fof, first_progs, next_progs):
                 node_name = str(loc) #label node by location
                 node_label = "Node {}, Snap {}\n id={}\n M={:.2e} M./h (Len = {})".format(node_name, snap, ctag, mass, l)
-                color_fp = colors.to_hex(cm(norm(mass))) + trans_halo
+                color_fp = colors.to_hex(cm(norm(mass)))
                 node = pydot.Node(node_name, label=node_label, fillcolor=color_fp, style="filled",
                                   color=outlinecolor, fontcolor=fontcolor)
                 cl.add_node(node)
@@ -1077,11 +1068,6 @@ def drawforest(trees, treenum, filetype='.png', sim=default_sim, cmap='Purples',
                         #replace next prog with -1 since it has been accounted for
                         next_progenitors_this[nidx] = -1
                             
-            #add invisible edge between last node in previous fof_group and first node in this group
-            if ncl > 0:
-                treegraph.add_edge(pydot.Edge(nodes_this[-len(nodes_fof) - 1], nodes_fof[0],
-                                              ltail=cl_this[ncl-1].get_name(), lhead=cl.get_name(),  color=next_fof_arrow))
-                                  
             #add edges for descendents progenitors and next progenitors connecting to nodes in this fof group
             if sidx > 0:
                 #names = [nd.get_name() for nd in nodes_fof]
@@ -1159,9 +1145,9 @@ def drawforest(trees, treenum, filetype='.png', sim=default_sim, cmap='Purples',
 
     if '.png' in filetype:
         treeid = '{}_{}'.format(treenum, xname) if len(xname) > 0 else treenum
-        fn = '../pngfiles/tree_{}.png'.format(treeid)
+        fn = '../pngfiles/tree_{}.pdf'.format(treeid)
         #fd = '../pngfiles/tree_{}.dot'.format(treeid)
-        treegraph.write_png(fn)
+        treegraph.write_pdf(fn)
         #treegraph.write_dot(fd)
         print('Wrote {}'.format(fn))
 
