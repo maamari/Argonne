@@ -21,22 +21,14 @@ debug=False
 branchingTrees = [] 
 for i in range(len(trees)): 
     #if ((trees[i]['NextHaloInFOFGroupOffset']>-1).any()):
-    if (trees[i][0]['Len']>1000) and ((trees[i]['NextHaloInFOFGroupOffset']>-1).any()): 
+    if (trees[i][0]['Len']>0) and ((trees[i]['NextHaloInFOFGroupOffset']>-1).any()): 
         branchingTrees.append(i) 
  
 print("Num trees =", len(branchingTrees)) 
 massiveTrees = [] 
 for treenum in tqdm(branchingTrees): 
     temp = trees[treenum] 
-    
-    #i=0
-    #while i < len(temp)-1: 
-    #    if temp[i]['FirstProgenitorOffset']==-1 and temp[i+1]['Len']<100: 
-    #        while temp[i+1]['FirstProgenitorOffset']!=-1 and i!=len(temp): temp=np.delete(temp,i+1) 
-    #        temp=np.delete(temp,i+1) 
-    #        i=0 
-    #    i+=1 
-    
+   
     if debug: print(temp)
     for index in range(len(temp)-1): 
         if abs(temp[index+1]['FirstHaloInFOFGroupOffset']-temp[index]['FirstHaloInFOFGroupOffset']) > 1: 
@@ -79,7 +71,10 @@ for treenum in tqdm(branchingTrees):
             for i in range(len(progs_)-1): 
                 progs[i]['NextProgenitorOffset'] = progs_[i+1]['FirstHaloInFOFGroupOffset'] 
                 temp[[prog[3] for prog in progs_]] = progs_ 
- 
+    
+    for i in range(len(temp)):
+        temp[i]['M_Crit200']*=(2.7e9/1.e10)
+
     if debug: print("\n",temp) 
     massiveTrees.append(temp)
 
