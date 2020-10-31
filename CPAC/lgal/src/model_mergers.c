@@ -212,7 +212,6 @@ double estimate_merging_time(int halonr, int mother_halonr, int p)
       terminate("can't be...!\n");
     }
 
-
   coulomb = log(Halo[mother_halonr].Len / ((double) Halo[halonr].Len) + 1);
 
   /*  should include stellar+cold gas in SatelliteMass! */

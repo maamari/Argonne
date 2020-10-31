@@ -81,7 +81,7 @@ void load_tree_table(int filenr)
 
 
 #ifdef  UPDATETYPETWO
-  load_all_auxdata(filenr);
+//  load_all_auxdata(filenr);
 #endif
 
 #ifdef PARALLEL
@@ -260,7 +260,7 @@ void free_tree_table(void)
   myfree(TreeNHalos);
 
 #ifdef UPDATETYPETWO
-  myfree(TreeAuxData);
+//  myfree(TreeAuxData);
 #endif
 
 #ifdef LOADIDS

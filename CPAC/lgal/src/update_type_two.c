@@ -38,29 +38,35 @@ void update_type_two_coordinate_and_velocity(int tree, int i, int centralgal)
   float tmppos;
   double Scale_V, dv;
   p=i;
-//printf("updating type 2 treenr =%d\n",tree);
+printf("Updating type 2, TreeNr = %d\n",tree);
 #ifdef GUO10
   if(HaloGal[i].Type == 2)  /* Update positions of type 2's */
 #else
+  printf("5.121\n");	  
     if(Gal[i].Type == 2)  /* Update positions of type 2's */
 #endif
       {
 #ifdef GUO10
 	int snapnum = HaloGal[i].SnapNum;
 #else
-    	int snapnum = Gal[i].SnapNum;
+  printf("5.122\n");
+	int snapnum = Gal[i].SnapNum;
 #endif
-        Nids = CountIDs_snaptree[snapnum * Ntrees + tree];
-        OffsetIDs = OffsetIDs_snaptree[snapnum * Ntrees + tree];
-
+  printf("5.123\n");
+  printf("%d, %ld\n",snapnum*Ntrees+tree,sizeof(CountIDs_snaptree));
+  for(int i=0; i<sizeof(CountIDs_snaptree); i++){
+	printf("%d",i);
+  }
+  	Nids = CountIDs_snaptree[snapnum * Ntrees + tree];
+  printf("5.124\n");        
+	OffsetIDs = OffsetIDs_snaptree[snapnum * Ntrees + tree];
         size_t header_offset = 4 * sizeof(int) + 2 * TotSnaps * sizeof(int) + 2 * TotSnaps * Ntrees * sizeof(int) + 2
             * sizeof(int) * NtotHalos;
-
         IdList = (long long *) (TreeAuxData + header_offset);
         PosList = (float *) (TreeAuxData + header_offset + TotIds * sizeof(long long));
         VelList = (float *) (TreeAuxData + header_offset + TotIds * sizeof(long long) + TotIds * 3 * sizeof(float));
-
-        IdList += OffsetIDs;
+        
+	IdList += OffsetIDs;
         PosList += 3 * OffsetIDs;
         VelList += 3 * OffsetIDs;
 #ifdef GUO10
@@ -68,7 +74,6 @@ void update_type_two_coordinate_and_velocity(int tree, int i, int centralgal)
 #else
         get_coordinates(Gal[i].Pos, Gal[i].Vel, Gal[i].MostBoundID, tree, Gal[i].HaloNr, Gal[i].SnapNum);
 #endif
-
 //#ifdef SCALE_COSMOLOGY
 #ifdef GUO10
         for(j = 0; j < 3; j++)
@@ -78,7 +83,6 @@ void update_type_two_coordinate_and_velocity(int tree, int i, int centralgal)
           Gal[i].Pos[j] *= ScalePos;
 #endif
 //#endif
-
 #ifdef GUO10
         for(j = 0; j < 3; j++)
           {
@@ -109,7 +113,6 @@ void update_type_two_coordinate_and_velocity(int tree, int i, int centralgal)
               Gal[p].Pos[j] = Gal[p].Pos[j] - BoxSize;
           }
 #endif
-
 #ifdef GUO10
         //#ifdef SCALE_COSMOLOGY
 	//add by Qi. 06/04/2012 to account for the scale of velocity field

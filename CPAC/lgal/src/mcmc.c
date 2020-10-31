@@ -143,7 +143,7 @@ void Senna()
       CurrentMCMCStep=ii;
       GlobalMCMCStep+=1;
       time(&local_initial);
-      printf("MCMC %d STARTED on Task %d\n", ii, ThisTask+FirstChainNumber);
+      printf("\nMCMC %d STARTED on Task %d\n", ii, ThisTask+FirstChainNumber);
 
       IndividualAcceptRate = 0;
 
@@ -248,20 +248,26 @@ void Senna()
  *       a step is accepted in the MCMC*/
 void print_parameters (int AcceptanceLogic, FILE *fmcmc)
 {
+  printf("\n\n\n\n PRINTING PARAMETERS... \n\n\n\n");
   int i, snap, chainweight=1;
-
-  fprintf(fmcmc,"%d %0.8g",chainweight, -(log10(lhood1)));
-
+  
+  fprintf(fmcmc,"%d %0.8g\n",chainweight, -(log10(lhood1)));
+  
   //print parameters into output file
   for(i=0;i<MCMCNpar;++i)
     {
       if(MCMC_PAR[i].Sampling_Switch==1)
 	{
-	  if(Time_Dependent_PhysPar==1)
-	    for(snap=0;snap<NOUT;snap++)
-	      fprintf(fmcmc," %0.6f", log10(MCMC_PAR[i].Value[snap]));
-	  else
-	    fprintf(fmcmc," %0.6f", log10(MCMC_PAR[i].Value[0]));
+	  if(Time_Dependent_PhysPar==1){
+	    for(snap=0;snap<NOUT;snap++){
+	      fprintf(fmcmc,"%0.6f %0.2g %s\n",log10(MCMC_PAR[i].Value[snap]),MCMC_PAR[i].PropValue[snap],MCMC_PAR[i].Name);
+	      //fprintf(fmcmc," %0.6f\n", log10(MCMC_PAR[i].Value[snap]));
+	    }
+	  }
+	  else{
+            fprintf(fmcmc,"%0.6f %0.2g %s\n",log10(MCMC_PAR[i].Value[0]),MCMC_PAR[i].PropValue[0],MCMC_PAR[i].Name);
+	    //fprintf(fmcmc," %0.6f", log10(MCMC_PAR[i].Value[0]));
+	  }
 	}
     }
   fprintf(fmcmc,"\n");
@@ -270,7 +276,7 @@ void print_parameters (int AcceptanceLogic, FILE *fmcmc)
 
 
   //print to screen
-  /*if(AcceptanceLogic==1)
+  if(AcceptanceLogic==1)
     {
       printf("\n******************************************************\n");
       printf("Accepted!!!\n");
@@ -657,10 +663,10 @@ void read_sample_info (void)
       for(i=0;i<NFofsInSample[snap];i++)
 	{
 	  fscanf(fa, "%lld %d %d %lg\n", &MCMC_FOF[i].FoFID[snap], &DumbTreeNrColector, &DumbFileNrColector, &MCMC_FOF[i].Weight[snap]);
-	  printf("FOF: %d\n",i);
-	  printf("Before: %f, %f\n",MCMC_FOF[i].Weight[snap], BoxSize*BoxSize*BoxSize);
+	  //printf("FOF: %d\n",i);
+	  //printf("Before: %f, %f\n",MCMC_FOF[i].Weight[snap], BoxSize*BoxSize*BoxSize);
 	  MCMC_FOF[i].Weight[snap]/=BoxSize*BoxSize*BoxSize;
-	  printf("After: %f\n",MCMC_FOF[i].Weight[snap]);
+	  //printf("After: %f\n",MCMC_FOF[i].Weight[snap]);
 #ifdef HALOMODEL
 	  MCMC_FOF[i].NGalsInFoF[snap]=0;
 	  MCMC_FOF[i].IndexOfCentralGal[snap]=-1;

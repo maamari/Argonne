@@ -513,9 +513,9 @@ double NumToTime(int num)
 
 double get_virial_mass(int halonr)
 {
-  if(halonr == Halo[halonr].FirstHaloInFOFgroup && Halo[halonr].M_Crit200)
-    return Halo[halonr].M_Crit200;	/* take spherical overdensity mass estimate */
-  else
+  //if(halonr == Halo[halonr].FirstHaloInFOFgroup && Halo[halonr].M_Crit200)
+    //return Halo[halonr].M_Crit200;	/* take spherical overdensity mass estimate */
+  //else
     return Halo[halonr].Len * PartMass;
 }
 
@@ -722,7 +722,6 @@ void update_type_1(int ngal, int halonr, int prog)
  *  dark matter halo and its position cannot be tracked. */
 void update_type_2(int ngal,int halonr, int prog,int mostmassive)
 {
-
  if(Gal[ngal].Type != 2)
    {
      int j;
@@ -736,7 +735,6 @@ void update_type_2(int ngal,int halonr, int prog,int mostmassive)
   Gal[ngal].Type = 2;
 
   Gal[ngal].HotRadius = 0.0;
-
   /* Estimate remaining merging timescale. */
   if (Gal[ngal].MergeOn == 0)
     {

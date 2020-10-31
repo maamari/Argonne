@@ -73,11 +73,11 @@ int main(int argc, char **argv)
   char buf[1000];
   time_t start, current;
 
-
 #ifdef PARALLEL
   MPI_Init(&argc, &argv);
   MPI_Comm_rank(MPI_COMM_WORLD, &ThisTask);
   MPI_Comm_size(MPI_COMM_WORLD, &NTask);
+  printf("%d",NTask);
 #else
   NTask = 1;
   ThisTask = 0;
@@ -162,6 +162,8 @@ int main(int argc, char **argv)
 #endif
     write_sfh_bins();
 #endif
+
+
 
 #ifndef MCMC
   nfiles=get_nr_files_to_process(ThisTask);
@@ -288,7 +290,7 @@ void SAM(int filenr)
   //for(treenr = 0; treenr < NTrees_Switch_MR_MRII; treenr++)
   for(treenr = 0; treenr < Ntrees; treenr++)
   {
-  //printf("Tree %d of %d\n", treenr, Ntrees);
+       printf("Doing tree %d of %d\n", treenr, Ntrees);
 #ifdef MR_PLUS_MRII
   	if(treenr == NTrees_Switch_MR_MRII)
   		change_dark_matter_sim("MRII");
@@ -300,9 +302,7 @@ void SAM(int filenr)
       if(CurrentMCMCStep==1)
 #endif
 #endif
-        //printf("Scaling cosmology.\n");
         scale_cosmology(TreeNHalos[treenr]);
-        //printf("Done Scaling cosmology.\n");
 
       gsl_rng_set(random_generator, filenr * 100000 + treenr);
       NumMergers = 0;
@@ -312,33 +312,29 @@ void SAM(int filenr)
       IndexStored = 0;
 #endif
       int snapnum;
-      //printf("LastSnapShotNr: %d\n", LastSnapShotNr);
       //LastSnapShotNr is the highest output snapshot
       /* we process the snapshots now in temporal order 
        * (as a means to reduce peak memory usage) */
       for(snapnum = 0; snapnum <= LastSnapShotNr; snapnum++)
       {
-          //printf("Snapnum: %d.\n", snapnum);
 #ifdef MCMC
     	  /* read the appropriate parameter list for current snapnum
     	   * into the parameter variables to be used in construct_galaxies */
-	  read_mcmc_par(snapnum);
+    	  read_mcmc_par(snapnum);
 #ifdef HALOMODEL
           //because we need halo masses even for FOFs
           //with no galaxies it needs to be done here
           assign_FOF_masses(snapnum, treenr);
 #endif
 #endif
-    	  for(halonr = 0; halonr < TreeNHalos[treenr]; halonr++){
+    	  for(halonr = 0; halonr < TreeNHalos[treenr]; halonr++)
     	  	if(HaloAux[halonr].DoneFlag == 0 && Halo[halonr].SnapNum == snapnum){
     	  		construct_galaxies(filenr, treenr, halonr);
 		}
-	  }
       }
       /* output remaining galaxies as needed */
       while(NHaloGal)
       	output_galaxy(treenr, 0);
-
 
 #ifndef MCMC
 #ifdef GALAXYTREE
@@ -353,6 +349,7 @@ void SAM(int filenr)
 #endif
       free_galaxies_and_tree();
   }//loop on trees
+
 #ifdef MCMC
   double lhood = get_likelihood();
 
@@ -373,6 +370,7 @@ void SAM(int filenr)
 #else
   close_galaxy_files();
 #endif
+
   return;
 #endif
 }
@@ -389,6 +387,7 @@ void SAM(int filenr)
   *        join_galaxies_of_progenitors and evolve_galaxies. */
 void construct_galaxies(int filenr, int treenr, int halonr)
 {
+  //printf("1\n");
   static int halosdone = 0;
   int prog, fofhalo, ngal, cenngal, p;
 
@@ -396,14 +395,20 @@ void construct_galaxies(int filenr, int treenr, int halonr)
   halosdone++;
 
   prog = Halo[halonr].FirstProgenitor;
-
+  //printf("2\n");
   while(prog >= 0) //If halo has a progenitor
     {
-      if(HaloAux[prog].DoneFlag == 0) //If progenitor hasn't been done yet
-		construct_galaxies(filenr, treenr, prog);
+      //printf("2.1\n");
+      if(HaloAux[prog].DoneFlag == 0) { //If progenitor hasn't been done yet 
+	      //printf("2.2\n");
+	      //construct_galaxies(filenr, treenr, prog);
+	      //printf("2.3\n");
+      }
+      //printf("2.4\n");
       prog = Halo[prog].NextProgenitor;	//Jump to next halo in progenitors FOF
+      //printf("2.5\n");
     }
-
+  //printf("3\n");
   //Now check for the progenitors of all the halos in the current FOF group
   fofhalo = Halo[halonr].FirstHaloInFOFgroup;	//Starting at the first halo in current FOF
   if(HaloAux[fofhalo].HaloFlag == 0)	//If it hasn't been done
@@ -418,11 +423,10 @@ void construct_galaxies(int filenr, int treenr, int halonr)
     			construct_galaxies(filenr, treenr, prog);
     		  prog = Halo[prog].NextProgenitor;
     	    }
-
     	  fofhalo = Halo[fofhalo].NextHaloInFOFgroup;	//Jump to next halo in FOF
         }
     }
-
+   //printf("4\n");
   /* At this point, the galaxies for all progenitors of this halo have been
    * properly constructed. Also, the galaxies of the progenitors of all other 
    * halos in the same FOF-group have been constructed as well. We can hence go
@@ -442,17 +446,18 @@ void construct_galaxies(int filenr, int treenr, int halonr)
        * ngals will be the total number of galaxies in the current FOF*/
       while(fofhalo >= 0)
         {
+	  //printf("TreeNr: %d\n",treenr);
     	  ngal = join_galaxies_of_progenitors(fofhalo, ngal, &cenngal);
+	  //printf("5\n");
     	  fofhalo = Halo[fofhalo].NextHaloInFOFgroup;
         }
-
-
+      
       /*Evolve the Galaxies -> SAM! */
       evolve_galaxies(Halo[halonr].FirstHaloInFOFgroup, ngal, treenr, cenngal);
-
       for (p =0;p<ngal;p++)
 	    mass_checks("Construct_galaxies #1",p);
     }
+    //printf("6\n");
 }
 
 
@@ -475,12 +480,14 @@ void construct_galaxies(int filenr, int treenr, int halonr)
 int join_galaxies_of_progenitors(int halonr, int ngalstart, int *cenngal)
 {
   int ngal, prog, i, j, first_occupied, lenmax, centralgal, mostmassive;
-
-
+  /* Set first_occ and prog to the first progenitor of the current halo 
+   *   where first_occ points to the most massive subhalo
+   * For a given progenitor, check if it doesn't contain any galaxies
+   * If so, check if there's 
+   *  */
   lenmax = 0;
   first_occupied = Halo[halonr].FirstProgenitor;
   prog = Halo[halonr].FirstProgenitor;
-
 
   /* When there is no galaxy in the Halo of FirstProgenitor, the first_occupied
    * pointer is changed to a subhalo which have the maximum mass (This should
@@ -492,7 +499,6 @@ int join_galaxies_of_progenitors(int halonr, int ngalstart, int *cenngal)
 	while(prog >= 0)
 	  {
 	    int currentgal;
-
 	    for(i = 0, currentgal = HaloAux[prog].FirstGalaxy; i < HaloAux[prog].NGalaxies; i++)
 	      {
 		if(HaloGal[currentgal].Type == 0 || HaloGal[currentgal].Type == 1)
@@ -507,8 +513,8 @@ int join_galaxies_of_progenitors(int halonr, int ngalstart, int *cenngal)
 	      }
 	    prog = Halo[prog].NextProgenitor;
 	  }
-    }
-   
+    }  
+ 
   lenmax = 0;
   prog = Halo[halonr].FirstProgenitor;
   mostmassive = Halo[halonr].FirstProgenitor;
@@ -524,10 +530,16 @@ int join_galaxies_of_progenitors(int halonr, int ngalstart, int *cenngal)
 	}
       prog = Halo[prog].NextProgenitor;
     }
-
+  
   ngal = ngalstart;
   prog = Halo[halonr].FirstProgenitor;
 
+  /* Prog is first progenitor, first_occ is the most massive halo
+   * Iterate through progenitors, if the progen is not the most massive
+   *    
+   *  */
+  //printf("\n");
+  int cnt=0;
   while(prog >= 0)
     {
       int currentgal;
@@ -568,7 +580,7 @@ int join_galaxies_of_progenitors(int halonr, int ngalstart, int *cenngal)
 	  /* this deals with the central galaxies of subhalos */
 	  if(Gal[ngal].Type == 0 || Gal[ngal].Type == 1)
 	    {
-	      if(prog == first_occupied)
+	    if(prog == first_occupied)
 		{
 #ifdef HALOPROPERTIES
 		  Gal[ngal].HaloM_Mean200 = Halo[halonr].M_Mean200;
@@ -603,9 +615,11 @@ int join_galaxies_of_progenitors(int halonr, int ngalstart, int *cenngal)
 		    }
 		  Gal[ngal].Vmax = Halo[halonr].Vmax;
 		}
-	      else //type 2 galaxies
+	    else //type 2 galaxies
 		{
-		  printf("Type 2\n");	
+		  //printf("First_occ: %d, Prog: %d, NumGals: %d, Descendant: %d\n", first_occupied, prog, HaloAux[halonr].NGalaxies,Halo[halonr].Descendant);
+		  //printf("Halo: %d, ngal: %d, FileNr: %d, SnapNum: %d\n",halonr, ngal, Halo[halonr].FileNr, Halo[halonr].SnapNum);
+		  //printf("Type 2\n");
 		  update_type_2(ngal, halonr, prog, mostmassive);
 		}
 	    }
@@ -618,8 +632,8 @@ int join_galaxies_of_progenitors(int halonr, int ngalstart, int *cenngal)
 
 	  currentgal = HaloGal[currentgal].NextGalaxy;
 	}
-
       prog = Halo[prog].NextProgenitor;
+      cnt++;
     }
 
 
@@ -671,7 +685,6 @@ int join_galaxies_of_progenitors(int halonr, int ngalstart, int *cenngal)
     mass_checks("Bottom of join_galaxies_of_progenitors",i);
   
   report_memory_usage(&HighMark, "join_galaxies");
-
   return ngal;
 }
 
@@ -719,7 +732,7 @@ void evolve_galaxies(int halonr, int ngal, int treenr, int cenngal)
   Zcurr = ZZ[Halo[halonr].SnapNum];
 
   centralgal = Gal[0].CentralGal;
-	
+
   for (p =0;p<ngal;p++)
 	  mass_checks("Evolve_galaxies #0",p);
 
@@ -736,7 +749,6 @@ void evolve_galaxies(int halonr, int ngal, int treenr, int cenngal)
   for (p=0; p<ngal; p++)
     sfh_update_bins(p,Halo[halonr].SnapNum-1,nstep,age_in_years);
 #endif
-
   /* Handle the transfer of mass between satellites and central galaxies */
   deal_with_satellites(centralgal, ngal);
 
@@ -746,12 +758,10 @@ void evolve_galaxies(int halonr, int ngal, int treenr, int cenngal)
       Gal[p].Type = 3;
     else
       mass_checks("Evolve_galaxies #0.1",p);
-   
   /* Calculate how much hot gas needs to be accreted to give the correct baryon fraction
    * in the main halo. This is the universal fraction, less any reduction due to reionization. */
   infallingGas = infall_recipe(centralgal, ngal, Zcurr);
   Gal[centralgal].PrimordialAccretionRate=infallingGas/deltaT;
-  
   /* All the physics are computed in a number of intervals between snapshots
    * equal to STEPS */
   for (nstep = 0; nstep < STEPS; nstep++)
@@ -766,7 +776,6 @@ void evolve_galaxies(int halonr, int ngal, int treenr, int cenngal)
 	sfh_update_bins(p,Halo[halonr].SnapNum-1,nstep,age_in_years);
 
 #endif
-
       /* Infall onto central galaxy only, if required to make up a baryon deficit */
 #ifndef GUO10
 #ifndef GUO13
@@ -776,7 +785,6 @@ void evolve_galaxies(int halonr, int ngal, int treenr, int cenngal)
 	add_infall_to_hot(centralgal, infallingGas / STEPS);
 
       mass_checks("Evolve_galaxies #0.5",centralgal);
-
       for (p = 0; p < ngal; p++)
 	{
 	  /* don't treat galaxies that have already merged */
@@ -792,7 +800,6 @@ void evolve_galaxies(int halonr, int ngal, int treenr, int cenngal)
 	      compute_cooling(p, deltaT / STEPS, ngal);
 	    }
 	}
-
       //this must be separated as now satellite AGN can heat central galaxies
       //therefore the AGN from all satellites must be computed, in a loop inside this function,
       //before gas is cooled into central galaxies (only suppress cooling, the gas is not actually heated)
@@ -807,7 +814,6 @@ void evolve_galaxies(int halonr, int ngal, int treenr, int cenngal)
 	  mass_checks("Evolve_galaxies #3",p);
 	  //print_galaxy("check3", centralgal, halonr);
 	}
-
       /* Check for merger events */
       for(p = 0; p < ngal; p++)
 	{
@@ -841,7 +847,6 @@ void evolve_galaxies(int halonr, int ngal, int treenr, int cenngal)
 		}
 	    }
 	}//loop on all galaxies to detect mergers
-
 #ifdef DETAILED_METALS_AND_MASS_RETURN
       //DELAYED ENRICHMENT AND MASS RETURN + FEEDBACK: No fixed yield or recycling fraction anymore. FB synced with enrichment
       for (p = 0; p < ngal; p++)
@@ -879,7 +884,6 @@ void evolve_galaxies(int halonr, int ngal, int treenr, int cenngal)
 
   for (p =0;p<ngal;p++)
     mass_checks("Evolve_galaxies #6",p);
-  
 #ifdef COMPUTE_SPECPHOT_PROPERTIES
 #ifndef  POST_PROCESS_MAGS
   int n;
@@ -895,7 +899,6 @@ void evolve_galaxies(int halonr, int ngal, int treenr, int cenngal)
     }
 #endif  //POST_PROCESS_MAGS
 #endif //COMPUTE_SPECPHOT_PROPERTIES
-
   /* now save the galaxies of all the progenitors (and free the associated storage) */
   int prog = Halo[halonr].FirstProgenitor;
 
@@ -904,7 +907,7 @@ void evolve_galaxies(int halonr, int ngal, int treenr, int cenngal)
       int currentgal;
       for(i = 0, currentgal = HaloAux[prog].FirstGalaxy; i < HaloAux[prog].NGalaxies; i++)
         {
-	  int nextgal = HaloGal[currentgal].NextGalaxy;
+    	  int nextgal = HaloGal[currentgal].NextGalaxy;
     	  /* this will write this galaxy to an output file and free the storage associate with it */
     	  output_galaxy(treenr, HaloGal[currentgal].HeapIndex);
     	  currentgal = nextgal;
@@ -939,13 +942,11 @@ void evolve_galaxies(int halonr, int ngal, int treenr, int cenngal)
 	    }
 
 	  Gal[p].SnapNum = Halo[currenthalo].SnapNum;
-
 #ifndef GUO10
 #ifdef UPDATETYPETWO
 	  update_type_two_coordinate_and_velocity(treenr, p, Gal[0].CentralGal);
 #endif
 #endif
-
 	  /* when galaxies are outputed, the slot is filled with the
 	   * last galaxy in the heap. New galaxies always take the last spot */
 	  int nextgal = HaloGalHeap[NHaloGal];
@@ -995,7 +996,6 @@ void evolve_galaxies(int halonr, int ngal, int treenr, int cenngal)
       GalTree[p].FOFCentralGal = centralgal;
     }
 #endif
-
   report_memory_usage(&HighMark, "evolve_galaxies");
 }
 
@@ -1029,10 +1029,9 @@ void output_galaxy(int treenr, int heap_index)
 
 #else //Normal snap output
   int n;
-  for(n = 0; n < NOUT; n++){
+  for(n = 0; n < NOUT; n++)
     if(ListOutputSnaps[n] == HaloGal[gal_index].SnapNum)
       save_galaxy_append(treenr, gal_index, n);
-  }
 #endif
 #endif
 

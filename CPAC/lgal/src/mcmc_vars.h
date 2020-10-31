@@ -43,7 +43,7 @@ double MCMCConstraintsZZ[NOUT];
 //Nr of SAM galaxies used to compare with data
 int TotMCMCGals[NOUT];
 //To allocate structure with SAM Galaxies
-#define MCMCAllocFactor 200000
+#define MCMCAllocFactor 10000000
 //#define MCMCAllocFactor 1000000
 long MCMCseed;
 int Nbins[NOUT][MCMCNConstraints]; //bins on each obs test
