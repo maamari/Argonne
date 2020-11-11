@@ -20,8 +20,8 @@
 #ifndef __GSL_ERRNO_H__
 #define __GSL_ERRNO_H__
 
-#include <stdio.h>
-#include <errno.h>
+#include <stdio.h"
+#include <errno.h"
 #include "gsl_types.h"
 
 #undef __BEGIN_DECLS

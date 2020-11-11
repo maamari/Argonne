@@ -24,7 +24,7 @@
 
 #ifndef __GSL_CBLAS_H__
 #define __GSL_CBLAS_H__
-#include <stddef.h>
+#include <stddef.h"
 
 #undef __BEGIN_DECLS
 #undef __END_DECLS

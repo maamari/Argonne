@@ -19,7 +19,7 @@
 
 #ifndef __GSL_DIFF_H__
 #define __GSL_DIFF_H__
-#include <gsl/gsl_math.h>
+#include "gsl_math.h"
 
 #undef __BEGIN_DECLS
 #undef __END_DECLS

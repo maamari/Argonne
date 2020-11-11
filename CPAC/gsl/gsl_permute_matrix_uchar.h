@@ -21,9 +21,9 @@
 #define __GSL_PERMUTE_MATRIX_UCHAR_H__
 
 #include <stdlib.h>
-#include <gsl/gsl_errno.h>
-#include <gsl/gsl_permutation.h>
-#include <gsl/gsl_matrix_uchar.h>
+#include "gsl_errno.h"
+#include "gsl_permutation.h"
+#include "gsl_matrix_uchar.h"
 
 #undef __BEGIN_DECLS
 #undef __END_DECLS

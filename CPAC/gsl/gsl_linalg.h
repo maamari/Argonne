@@ -21,13 +21,13 @@
 #define __GSL_LINALG_H__
 
 #include <stdlib.h>
-#include <gsl/gsl_mode.h>
-#include <gsl/gsl_permutation.h>
-#include <gsl/gsl_vector.h>
-#include <gsl/gsl_matrix.h>
-#include <gsl/gsl_math.h>
-#include <gsl/gsl_inline.h>
-#include <gsl/gsl_blas.h>
+#include "gsl_mode.h"
+#include "gsl_permutation.h"
+#include "gsl_vector.h"
+#include "gsl_matrix.h"
+#include "gsl_math.h"
+#include "gsl_inline.h"
+#include "gsl_blas.h"
 
 #undef __BEGIN_DECLS
 #undef __END_DECLS

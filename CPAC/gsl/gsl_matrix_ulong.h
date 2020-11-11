@@ -21,11 +21,11 @@
 #define __GSL_MATRIX_ULONG_H__
 
 #include <stdlib.h>
-#include <gsl/gsl_types.h>
-#include <gsl/gsl_errno.h>
-#include <gsl/gsl_inline.h>
-#include <gsl/gsl_check_range.h>
-#include <gsl/gsl_vector_ulong.h>
+#include "gsl_types.h"
+#include "gsl_errno.h"
+#include "gsl_inline.h"
+#include "gsl_check_range.h"
+#include "gsl_vector_ulong.h"
 
 #undef __BEGIN_DECLS
 #undef __END_DECLS

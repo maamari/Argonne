@@ -21,7 +21,7 @@
 #define __GSL_HISTOGRAM_H__
 
 #include <stdlib.h>
-#include <stdio.h>
+#include <stdio.h"
 
 #undef __BEGIN_DECLS
 #undef __END_DECLS

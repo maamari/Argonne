@@ -24,11 +24,11 @@
 #define __GSL_MULTIMIN_H__
 
 #include <stdlib.h>
-#include <gsl/gsl_types.h>
-#include <gsl/gsl_math.h>
-#include <gsl/gsl_vector.h>
-#include <gsl/gsl_matrix.h>
-#include <gsl/gsl_min.h>
+#include "gsl_types.h"
+#include "gsl_math.h"
+#include "gsl_vector.h"
+#include "gsl_matrix.h"
+#include "gsl_min.h"
 
 #undef __BEGIN_DECLS
 #undef __END_DECLS

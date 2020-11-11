@@ -20,8 +20,8 @@
 #ifndef __GSL_MOVSTAT_H__
 #define __GSL_MOVSTAT_H__
 
-#include <gsl/gsl_math.h>
-#include <gsl/gsl_vector.h>
+#include "gsl_math.h"
+#include "gsl_vector.h"
 
 #undef __BEGIN_DECLS
 #undef __END_DECLS

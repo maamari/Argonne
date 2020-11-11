@@ -20,7 +20,7 @@
 #ifndef __GSL_STATISTICS_SHORT_H__
 #define __GSL_STATISTICS_SHORT_H__
 
-#include <stddef.h>
+#include <stddef.h"
 #include <stdlib.h>
 
 #undef __BEGIN_DECLS

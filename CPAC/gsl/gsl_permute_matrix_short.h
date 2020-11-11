@@ -21,9 +21,9 @@
 #define __GSL_PERMUTE_MATRIX_SHORT_H__
 
 #include <stdlib.h>
-#include <gsl/gsl_errno.h>
-#include <gsl/gsl_permutation.h>
-#include <gsl/gsl_matrix_short.h>
+#include "gsl_errno.h"
+#include "gsl_permutation.h"
+#include "gsl_matrix_short.h"
 
 #undef __BEGIN_DECLS
 #undef __END_DECLS

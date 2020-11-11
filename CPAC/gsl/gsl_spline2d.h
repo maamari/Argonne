@@ -20,8 +20,8 @@
 #ifndef __GSL_SPLINE2D_H__
 #define __GSL_SPLINE2D_H__
 
-#include <gsl/gsl_interp.h>
-#include <gsl/gsl_interp2d.h>
+#include "gsl_interp.h"
+#include "gsl_interp2d.h"
 
 #undef __BEGIN_DECLS
 #undef __END_DECLS

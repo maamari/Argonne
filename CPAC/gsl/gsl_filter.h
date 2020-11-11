@@ -20,9 +20,9 @@
 #ifndef __GSL_FILTER_H__
 #define __GSL_FILTER_H__
 
-#include <gsl/gsl_math.h>
-#include <gsl/gsl_vector.h>
-#include <gsl/gsl_movstat.h>
+#include "gsl_math.h"
+#include "gsl_vector.h"
+#include "gsl_movstat.h"
 
 #undef __BEGIN_DECLS
 #undef __END_DECLS

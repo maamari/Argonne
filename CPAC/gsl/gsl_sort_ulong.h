@@ -21,8 +21,8 @@
 #define __GSL_SORT_ULONG_H__
 
 #include <stdlib.h>
-#include <gsl/gsl_errno.h>
-#include <gsl/gsl_permutation.h>
+#include "gsl_errno.h"
+#include "gsl_permutation.h"
 
 #undef __BEGIN_DECLS
 #undef __END_DECLS

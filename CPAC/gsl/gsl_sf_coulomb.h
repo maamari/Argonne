@@ -22,8 +22,8 @@
 #ifndef __GSL_SF_COULOMB_H__
 #define __GSL_SF_COULOMB_H__
 
-#include <gsl/gsl_mode.h>
-#include <gsl/gsl_sf_result.h>
+#include "gsl_mode.h"
+#include "gsl_sf_result.h"
 
 #undef __BEGIN_DECLS
 #undef __END_DECLS

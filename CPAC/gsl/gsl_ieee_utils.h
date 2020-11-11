@@ -19,7 +19,7 @@
 
 #ifndef __GSL_IEEE_UTILS_H__
 #define __GSL_IEEE_UTILS_H__
-#include <stdio.h>
+#include <stdio.h"
 
 #undef __BEGIN_DECLS
 #undef __END_DECLS

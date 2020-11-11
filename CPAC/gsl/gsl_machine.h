@@ -2,8 +2,8 @@
 #ifndef __GSL_MACHINE_H__
 #define __GSL_MACHINE_H__
 
-#include <limits.h>
-#include <float.h>
+#include <limits.h"
+#include <float.h"
 
 /* magic constants; mostly for the benefit of the implementation */
 

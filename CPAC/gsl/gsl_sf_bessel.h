@@ -23,9 +23,9 @@
 #define __GSL_SF_BESSEL_H__
 
 #include <stdlib.h>
-#include <gsl/gsl_mode.h>
-#include <gsl/gsl_precision.h>
-#include <gsl/gsl_sf_result.h>
+#include "gsl_mode.h"
+#include "gsl_precision.h"
+#include "gsl_sf_result.h"
 
 #undef __BEGIN_DECLS
 #undef __END_DECLS

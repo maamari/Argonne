@@ -21,9 +21,9 @@
 #define __GSL_PERMUTE_VECTOR_COMPLEX_DOUBLE_H__
 
 #include <stdlib.h>
-#include <gsl/gsl_errno.h>
-#include <gsl/gsl_permutation.h>
-#include <gsl/gsl_vector_complex_double.h>
+#include "gsl_errno.h"
+#include "gsl_permutation.h"
+#include "gsl_vector_complex_double.h"
 
 #undef __BEGIN_DECLS
 #undef __END_DECLS

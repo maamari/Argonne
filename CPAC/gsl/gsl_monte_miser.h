@@ -23,9 +23,9 @@
 #ifndef __GSL_MONTE_MISER_H__
 #define __GSL_MONTE_MISER_H__
 
-#include <gsl/gsl_rng.h>
-#include <gsl/gsl_monte.h>
-#include <gsl/gsl_monte_plain.h>
+#include "gsl_rng.h"
+#include "gsl_monte.h"
+#include "gsl_monte_plain.h"
 
 #undef __BEGIN_DECLS
 #undef __END_DECLS

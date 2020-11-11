@@ -20,11 +20,11 @@
 #ifndef __GSL_DFT_COMPLEX_H__
 #define __GSL_DFT_COMPLEX_H__
 
-#include <stddef.h>
+#include <stddef.h"
 
-#include <gsl/gsl_math.h>
-#include <gsl/gsl_complex.h>
-#include <gsl/gsl_fft.h>
+#include "gsl_math.h"
+#include "gsl_complex.h"
+#include "gsl_fft.h"
 
 #undef __BEGIN_DECLS
 #undef __END_DECLS

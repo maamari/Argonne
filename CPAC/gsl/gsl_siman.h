@@ -20,7 +20,7 @@
 #ifndef __GSL_SIMAN_H__
 #define __GSL_SIMAN_H__
 #include <stdlib.h>
-#include <gsl/gsl_rng.h>
+#include "gsl_rng.h"
 
 #undef __BEGIN_DECLS
 #undef __END_DECLS
