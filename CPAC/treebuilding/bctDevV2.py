@@ -821,7 +821,8 @@ def main(argv):
     coretrees = {}
 
     for n, s in enumerate(snapshots): #process in descending order
-        print('Processing snapshot {}'.format(s))
+        #print('Processing snapshot {}'.format(s))
+        
         stime = time() 
         corecat = get_core_snapshot(coredir, int(s), sim=sim)
         if corecat:
@@ -983,8 +984,8 @@ def drawforest(trees, treenum, filetype='.png', sim=default_sim, cmap='Purples',
     snaps = np.arange(np.min(tree[SnapNum]), np.max(tree[SnapNum]+1))[::-1]
 
     #loop through snapshots; assign clusters and nodes
-    for sidx, snap in enumerate(tqdm(snaps)):
-        print('Processing snapshot {}'.format(snap))
+    for sidx, snap in enumerate(snaps):
+        #print('Processing snapshot {}'.format(snap))
         locs = np.where(tree[SnapNum]==snap)[0]
         #print('locs ', locs)
         coretags = tree[MostBoundID_Coretag][locs]

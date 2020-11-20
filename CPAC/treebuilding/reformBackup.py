@@ -6,23 +6,32 @@ import sys
 
 #####################################################################################################################
 
-#infile='1_of_20_11_10_20/trees_099.0.vector' 
-##infile='1_file_of_20/trees_099.0.vector' 
-#outfile='mergedLJ.0'
+infile='1_file_of_20/trees_099.0.vector' 
+outfile='mergedLJ2.0'
 
-infile='../../lgalMill/MergerTrees/MR/treedata/_trees_063.5'
-outfile='mergedMill500.0'
+#infile='../../lgalMill/MergerTrees/MR/treedata/trees_063.5'
+#outfile='mergedMill.0'
 trees=bctDevV2.read_binary(infile) 
  
+count=0
+for i in range(len(trees)):
+    if len(trees[i]):
+        if trees[i][0]['Len'] > 185:
+            count+=1
+cutFactor=count//1000
+
 branchingTrees = [] 
 straightTrees = []
+count=0
 for i in range(len(trees)): # Iterate through all trees
     if len(trees[i]):
-        if trees[i][0]['Len'] > 0:
-            if (trees[i]['NextHaloInFOFGroupOffset']>-1).any():    # If at any point there are multiple subhalos in group
+        if trees[i][0]['Len'] > 500:    # If tree satisfies some minimum z=0 length (optional, set to > 0 if you do not want to use minimum mass cut)
+            #count+=1
+            #if count%cutFactor!=0: continue
+            if (trees[i]['NextHaloInFOFGroupOffset']>-1).any():    # If at any point there are multiple subhalos within a FOF group
                 branchingTrees.append(i)    # Add the current tree to the list of trees to be fed through the merging code
             else:   # Otherwise we have a 'straight' tree and do not need to merge
-                straightTrees.append(i)    # Add the current tree to list of trees to be sent straight to output
+                straightTrees.append(i)    # So add the current tree to a separate list of trees to be sent straight to output without merging
 
 #####################################################################################################################
 
@@ -30,9 +39,12 @@ print("Num trees =", len(branchingTrees))
 outputTrees = []    # Array of trees to be rewritten to new vector file
 
 for treenum in tqdm(straightTrees): # Iterate through 'straight' trees
+    #treegraph, clusters, nodes, node_names, first_progenitors, next_progenitors = bctDevV2.drawforest(trees, treenum, xname='ori')    
+    #treegraph, clusters, nodes, node_names, first_progenitors, next_progenitors = bctDevV2.drawforest(trees, treenum, xname='red')
     outputTrees.append(trees[treenum].copy())   # Add to output array without merging
     
 for treenum in tqdm(branchingTrees):    # Iterate through 'branching' trees
+    #treegraph, clusters, nodes, node_names, first_progenitors, next_progenitors = bctDevV2.drawforest(trees, treenum, xname='ori')                                   
     temp = trees[treenum].copy()    # Create temporary copy of current tree
     debug=False 
 
@@ -49,7 +61,7 @@ for treenum in tqdm(branchingTrees):    # Iterate through 'branching' trees
     breakFlag=False
     delIndices = [] # Satellites to be deleted  
     delIndicesDict = {} 
-    minLen = 500 # Min length of satellites   
+    minLen = 100  # Min length of satellites   
     for index in range(len(newBranchEnd)):    # Iterate through end of branches
          
         fhTBD = [] 
@@ -64,6 +76,9 @@ for treenum in tqdm(branchingTrees):    # Iterate through 'branching' trees
                 firstHalos = np.where(temp['FirstHaloInFOFGroupOffset']==current)[0] # First halo not central edge case
                 if firstHalos.size:  
                     breakFlag=True 
+                    firstHalos = firstHalos[firstHalos!=current]                     
+                    firstHalos = np.append(firstHalos,current) 
+                    for halo in firstHalos: fhTBD.append(halo) 
                 
                 delIndices.append(current)  # Add current core to list of cores to be deleted, can't delete immediately because we have to keep indexing until wehave iterate through all branches
             current-=1  # Move to next core in the current branch  
@@ -76,21 +91,33 @@ for treenum in tqdm(branchingTrees):    # Iterate through 'branching' trees
         start=newBranchStart[index] 
         while current!=start-1:     # After finished iterating through branch (current==start-1) to flag satellites below mass cut for deletion, loop through branch once more to update the indexes of cores that are not going to be deleted (this loop must be done after the previous pass through the branch has completed because we need to know the number of cores needing deletion in order to update the indexes)
             
+            # FH edge case
+            delIndicesDict[current]=len(delIndices)
+            if fhTBD:  
+                badHalo = fhTBD[-1]  
+                fhTBD.remove(badHalo)  
+                sortedFH = sorted(temp[fhTBD], key=lambda tree:tree['M_Crit200'], reverse=True)   
+                fhMatch = np.where(temp['FirstHaloInFOFGroupOffset']==badHalo)[0]  
+                fhMatch = fhMatch[fhMatch!=badHalo]  
+                temp['FirstHaloInFOFGroupOffset'][fhMatch]=np.where(temp==sortedFH[0])[0][0]-delIndicesDict[np.where(temp==sortedFH[0])[0][0]]  
+                for val in fhMatch: fhTBD.remove(val) 
+            
             if current not in delIndices:   # Ieterate through branch once again, if a core was not flagged for deletion
-                fhMatch = np.where(temp2['FirstHaloInFOFGroupOffset']==start)[0]  # Find all instances of start core in tree (firstHaloInFOFGroup, nextHaloInFOFGroup, Descendent)
-                dMatch = np.where(temp2['DescendentOffset']==start)[0]
-#                fPMatch = np.where(temp2['FirstProgenitorOffset']==start)[0]
-
-                if fhMatch.size: temp['FirstHaloInFOFGroupOffset'][fhMatch] = start-len(delIndices)   # Replace all instances of start core's index by index - # cores to be deleted                
-                if dMatch.size: temp['DescendentOffset'][dMatch] = start-len(delIndices)
- #               if fPMatch.size: temp['FirstProgenitorOffset'][fPMatch] = start-len(delIndices)
-
-                if temp[start]['FirstProgenitorOffset'] != -1: # Do the same for firstProgenitor  
-                    temp[start]['FirstProgenitorOffset'] = start-len(delIndices)+1  # But instead replace by index - # cores to be deleted + 1 to abide by indexing conventions            
+                fhMatch = np.where(temp2['FirstHaloInFOFGroupOffset']==current)[0]  # Find all instances of current core in tree (firstHaloInFOFGroup, nextHaloInFOFGroup, Descendent)
+                if fhMatch.size: temp['FirstHaloInFOFGroupOffset'][fhMatch] = current-len(delIndices)   # Replace all instances of current core's index by index - # cores to be deleted
+                 
+                nhMatch = np.where(temp2['NextHaloInFOFGroupOffset']==current)[0] 
+                dMatch = np.where(temp2['DescendentOffset']==current)[0] 
+                if nhMatch.size: temp['NextHaloInFOFGroupOffset'][nhMatch] = current-len(delIndices) 
+                if dMatch.size: temp['DescendentOffset'][dMatch] = current-len(delIndices) 
+                 
+                if temp[current]['FirstProgenitorOffset'] != -1: # Do the same for firstProgenitor  
+                    temp[current]['FirstProgenitorOffset'] = current-len(delIndices)+1  # But instead replace by index - # cores to be deleted + 1 to abide by indexing conventions 
             current-=1 
     if breakFlag: continue
 
     temp = np.delete(temp, delIndices) # At this point we can safely delete the satellites below the mass cut from the tree
+    
  
     if debug: print("\n",temp) 
     for i in range(len(temp)):  # Iterate through tree to set NextProgenitors (by default set to -1 for all cores, this loop updates this property after merging)
@@ -112,6 +139,12 @@ for treenum in tqdm(branchingTrees):    # Iterate through 'branching' trees
 
     if debug: print("\n",temp) 
     outputTrees.append(temp)    # Append merged tree to the list of output trees
+    print(len(outputTrees)-1, treenum)
+    # outputTrees.append(trees[treenum].copy())
+
+    # Drawing
+    #trees[treenum]=temp
+    #treegraph, clusters, nodes, node_names, first_progenitors, next_progenitors = bctDevV2.drawforest(trees, treenum, xname='red')                                   
 
 #####################################################################################################################
 

@@ -1,7 +1,7 @@
 import bctDevV2
 from tqdm import tqdm
 
-lgalVersion = 'lgal'
+lgalVersion = 'lgalLargeParallel'
 #outfileLJ='/scratch/cpac/kmaamari/CoreTreesLJDS/trees_099.0.vector'
 outfileLJ='/home/kmaamari/lgalaxies/{}/MergerTrees/LJDS/treedata/trees_099.0'.format(lgalVersion)
 #outfileLJ='massiveTrees_099.0'
