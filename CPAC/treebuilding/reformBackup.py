@@ -6,7 +6,7 @@ import sys
 
 #####################################################################################################################
 
-infile='1_file_of_20/trees_099.0.vector' 
+infile='trees_099.0.vector' 
 outfile='mergedLJ2.0'
 
 #infile='../../lgalMill/MergerTrees/MR/treedata/trees_063.5'
@@ -26,8 +26,6 @@ count=0
 for i in range(len(trees)): # Iterate through all trees
     if len(trees[i]):
         if trees[i][0]['Len'] > 500:    # If tree satisfies some minimum z=0 length (optional, set to > 0 if you do not want to use minimum mass cut)
-            #count+=1
-            #if count%cutFactor!=0: continue
             if (trees[i]['NextHaloInFOFGroupOffset']>-1).any():    # If at any point there are multiple subhalos within a FOF group
                 branchingTrees.append(i)    # Add the current tree to the list of trees to be fed through the merging code
             else:   # Otherwise we have a 'straight' tree and do not need to merge
@@ -39,12 +37,9 @@ print("Num trees =", len(branchingTrees))
 outputTrees = []    # Array of trees to be rewritten to new vector file
 
 for treenum in tqdm(straightTrees): # Iterate through 'straight' trees
-    #treegraph, clusters, nodes, node_names, first_progenitors, next_progenitors = bctDevV2.drawforest(trees, treenum, xname='ori')    
-    #treegraph, clusters, nodes, node_names, first_progenitors, next_progenitors = bctDevV2.drawforest(trees, treenum, xname='red')
     outputTrees.append(trees[treenum].copy())   # Add to output array without merging
     
 for treenum in tqdm(branchingTrees):    # Iterate through 'branching' trees
-    #treegraph, clusters, nodes, node_names, first_progenitors, next_progenitors = bctDevV2.drawforest(trees, treenum, xname='ori')                                   
     temp = trees[treenum].copy()    # Create temporary copy of current tree
     debug=False 
 
@@ -61,7 +56,7 @@ for treenum in tqdm(branchingTrees):    # Iterate through 'branching' trees
     breakFlag=False
     delIndices = [] # Satellites to be deleted  
     delIndicesDict = {} 
-    minLen = 100  # Min length of satellites   
+    minLen = 500  # Min length of satellites   
     for index in range(len(newBranchEnd)):    # Iterate through end of branches
          
         fhTBD = [] 

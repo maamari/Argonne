@@ -6,20 +6,11 @@ import sys
 
 #####################################################################################################################
 
-#infile='1_file_of_20/trees_099.0.vector' 
-#outfile='mergedLJ.0'
+infile='trees_099.0.vector' 
+outfile='mergedLJ3.0'
 
-infile='../../lgalMill/MergerTrees/MR/treedata/trees_063.5'
-outfile='mergedMill.0'
 trees=bctDevV2.read_binary(infile) 
  
-count=0
-for i in range(len(trees)):
-    if len(trees):
-        if trees[i][0]['Len'] > 185:
-            count+=1
-cutFactor=count//1000
-
 branchingTrees = [] 
 straightTrees = []
 count=0
@@ -61,7 +52,7 @@ for treenum in tqdm(branchingTrees):    # Iterate through 'branching' trees
     breakFlag=False
     delIndices = [] # Satellites to be deleted  
     delIndicesDict = {} 
-    minLen = 750  # Min length of satellites   
+    minLen = 500  # Min length of satellites   
     for index in range(len(newBranchEnd)):    # Iterate through end of branches
          
         fhTBD = [] 
@@ -167,4 +158,3 @@ with open(outfile, "wb") as fh: # Write list of output trees to output file usin
         for j in range(len(outputTrees[i])):
             values = list(outputTrees[i][j])
             fh.write(pack(struct_format, *values))
-

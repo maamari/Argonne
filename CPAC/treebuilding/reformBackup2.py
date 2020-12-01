@@ -6,8 +6,9 @@ import sys
 
 #####################################################################################################################
 
-infile='1_of_20_11_10_20/trees_099.0.vector' 
+#infile='1_of_20_11_10_20/trees_099.0.vector' 
 ##infile='1_file_of_20/trees_099.0.vector' 
+infile='trees_099.0.vector'
 outfile='mergedLJ.0'
 
 #infile='../../lgalMill/MergerTrees/MR/treedata/_trees_063.5'
@@ -65,7 +66,7 @@ for treenum in tqdm(branchingTrees):    # Iterate through 'branching' trees
                 firstHalos = np.where(temp['FirstHaloInFOFGroupOffset']==current)[0] # First halo not central edge case
                 if firstHalos.size:  
                     count+=1
-                    print(count)
+                    #print(count)
                     breakFlag=True 
                     firstHalos = firstHalos[firstHalos!=current]                     
                     firstHalos = np.append(firstHalos,current) 
@@ -134,6 +135,7 @@ for treenum in tqdm(branchingTrees):    # Iterate through 'branching' trees
     # Drawing
     #trees[treenum]=temp
     #treegraph, clusters, nodes, node_names, first_progenitors, next_progenitors = bctDevV2.drawforest(trees, treenum, xname='red')                                   
+print(count)
 
 #####################################################################################################################
 

@@ -7,7 +7,7 @@ import sys
 #####################################################################################################################
 
 infile='mergedLJ.0'
-outfile='cut.0'
+outfile='cut7.0'
 
 #infile='../../lgalMill/MergerTrees/MR/treedata/_trees_063.5'
 #infile='mergedMill500.0'
@@ -41,9 +41,9 @@ for treenum in tqdm(straightTrees):
         elif temp[index]['Len']<cutLen:
             cutFlag=True
             delIndices.append(index)
-        elif temp[index]['M_Crit200']>0 and temp[index]['M_Crit200']<cutLen:
-            cutFlag=True
-            delIndices.append(index)
+#        elif temp[index]['M_Crit200']>0 and temp[index]['M_Crit200']<cutLen:
+#            cutFlag=True
+#            delIndices.append(index)
     temp = np.delete(temp, delIndices) 
     
     if len(temp):
@@ -106,13 +106,13 @@ for i, treenum in enumerate(tqdm(branchingTrees)):
                 if start!=newBranchStart[index]:
                     temp[start-1]['FirstProgenitorOffset'] = -1
                 delIndices.append(start)  
-            elif temp[start]['M_Crit200']>0 and temp[start]['M_Crit200']<cutLen:
-                cutFlag=True
-                temp['NextProgenitorOffset'] = np.where(temp['NextProgenitorOffset']==start, temp[start]['NextProgenitorOffset'], temp['NextProgenitorOffset'])
+ #           elif temp[start]['M_Crit200']>0 and temp[start]['M_Crit200']<cutLen:
+ #               cutFlag=True
+ #               temp['NextProgenitorOffset'] = np.where(temp['NextProgenitorOffset']==start, temp[start]['NextProgenitorOffset'], temp['NextProgenitorOffset'])
 
-                if start!=newBranchStart[index]:
-                    temp[start-1]['FirstProgenitorOffset'] = -1
-                delIndices.append(start)
+#                if start!=newBranchStart[index]:
+#                    temp[start-1]['FirstProgenitorOffset'] = -1
+#                delIndices.append(start)
             start+=1
         
         ''' 

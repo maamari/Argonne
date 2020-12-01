@@ -19,7 +19,7 @@ outputTrees=[]
 for treenum in tqdm(trees):
     temp = trees[treenum].copy()
     
-    temp['M_Crit200'] *= 2.7e9/(1e10/0.67)    
+    temp['M_Crit200'] *= 2.7e9/1e10    
     outputTrees.append(temp)  
 
 #####################################################################################################################
