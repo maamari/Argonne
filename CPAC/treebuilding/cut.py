@@ -1,25 +1,26 @@
-import bctDevV2 
+import bct as bctDevV2 
 import numpy as np 
 from tqdm import tqdm 
 from struct import pack 
 import sys 
 
-#outfile='../../lgalLarge/MergerTrees/LJDS/treedata/trees_099.0'
+infile='../../lgalLarge/MergerTrees/LJDS/treedata/trees_099.0'
 #outfile='massiveTrees_099.0'
-infile='../../lgalMill/MergerTrees/MR/treedata/_trees_063.5'
-outfile='cutMill2.0'
+#infile='../../lgalMill/MergerTrees/MR/treedata/_trees_063.5'
+#outfile='../../lgalMill/MergerTrees/MR/treedata/trees_063.5'
+#infile='binaries/cuti1.0'
+outfile='cut___.0'
 trees=bctDevV2.read_binary(infile) 
  
 massiveTrees = []
 count=0
 for i in tqdm(range(len(trees))):
-    #if trees[i][0]['Len'] > 185:
-    #    count+=1
-    #    if count%7==0:
-    #        massiveTrees.append(trees[i]) 
-    if len(trees[i]):
-        if trees[i][0]['Len'] > 500:
-            massiveTrees.append(trees[i])
+    count+=1
+    if count%3==0:
+        massiveTrees.append(trees[i]) 
+    #if len(trees[i]):
+    #    if trees[i][0]['Len'] > 2000:
+    #        massiveTrees.append(trees[i])
 
 print("Num trees =", len(massiveTrees)) 
 
