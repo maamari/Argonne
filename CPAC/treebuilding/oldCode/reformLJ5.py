@@ -1,4 +1,4 @@
-import bctDevV2 
+import bct as bctDevV2 
 import numpy as np 
 from tqdm import tqdm 
 from struct import pack 
@@ -8,11 +8,13 @@ import sys
 
 #infile='1_of_20_11_10_20/trees_099.0.vector' 
 ##infile='1_file_of_20/trees_099.0.vector' 
-infile='trees_099.0.vector'
-outfile='mergedLJ.0'
+#infile='fof_group_SV_lgal_SOD/trees_099.1.vector'
+#outfile='mergedLJ_SOD2.0'
+infile = '/home/kovacs/cosmology/LastJourney/CoreTrees/fof_group_SV_lgal_FOF/trees_099.5.vector'
+outfile = 'mergedLJ_FOF.5'
 
-#infile='../../lgalMill/MergerTrees/MR/treedata/_trees_063.5'
-#outfile='mergedMill500.0'
+#infile='../../lgalMill/MergerTrees/MR/treedata/trees_063.4'
+#outfile='mergedMill500_2.0'
 trees=bctDevV2.read_binary(infile) 
  
 branchingTrees = [] 

@@ -6,20 +6,16 @@ import sys
 
 #####################################################################################################################
 
-infile='mergedLJ_SOD.0'
-outfile='cutLJ_SOD.0'
-
-#infile='../../lgalMill/MergerTrees/MR/treedata/_trees_063.5'
-#infile='mergedMill500.0'
-#outfile='cutMill500.0'
+infile='binaries/trees_099.0'
+outfile='binaries/trees_099_cut.0'
 
 trees=bctDevV2.read_binary(infile)
 
 branchingTrees = []
 straightTrees = []
 outputTrees = []
-cutLen=500
-cutMass=65
+cutLen=100
+cutMass=13
 for i in range(len(trees)):
     if (len(trees[i])):
         if (trees[i]['NextHaloInFOFGroupOffset']>-1).any():  

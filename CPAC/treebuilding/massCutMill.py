@@ -6,8 +6,8 @@ import sys
 
 #####################################################################################################################
 
-infile='binaries/mergedMill500.0'
-outfile='cutMill5003.0'
+infile='../../lgalMill/MergerTrees/MR/treedata/trees_063.0'
+outfile='binaries/cutMill500_0.0'
 
 trees=bctDevV2.read_binary(infile)
 
@@ -15,8 +15,8 @@ count = 0
 branchingTrees = []
 straightTrees = []
 outputTrees = []
-cutLen=500
-cutMass=1
+cutLen=755
+cutMass=65
 for i in range(len(trees)):
     if (len(trees[i])):
         if (trees[i]['NextHaloInFOFGroupOffset']>-1).any():  
@@ -39,7 +39,7 @@ for treenum in tqdm(straightTrees):
         elif temp[index]['Len']<cutLen:
             cutFlag=True
             delIndices.append(index)
-        elif temp[index]['M_Crit200']<=cutMass:
+        elif temp[index]['M_Crit200']>0.0 and temp[index]['M_Crit200']<=cutMass:
             cutFlag=True
             delIndices.append(index)
     temp = np.delete(temp, delIndices) 
@@ -54,7 +54,7 @@ for treenum in tqdm(straightTrees):
 
 # Iterate through 'branching' tree
 for i, treenum in enumerate(tqdm(branchingTrees)):  
-    if i%2==0 or i%7==0: continue
+    #if i%2==0 or i%7==0: continue
     temp = trees[treenum].copy()  
     if len(temp)<=1: continue
     temp['NextProgenitorOffset']=-1
@@ -87,7 +87,7 @@ for i, treenum in enumerate(tqdm(branchingTrees)):
         elif temp[index]['Len']<cutLen:
             cutFlag=True
             delIndices.append(index)
-        elif temp[index]['M_Crit200']<=cutMass:
+        elif temp[index]['M_Crit200']>0.0 and temp[index]['M_Crit200']<=cutMass:            
             cutFlag=True
             delIndices.append(index)            
     temp = np.delete(temp, delIndices)
